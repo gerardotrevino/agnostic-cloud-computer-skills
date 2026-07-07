@@ -338,13 +338,15 @@ project-name/
 
 ## Phase 7: Skills Installation
 
-Pull the team's shared skills onto the machine. Skills are agnostic, reusable modules that agents read to understand how to perform specific tasks.
+Skills are agnostic, reusable modules that agents read to understand how to perform specific tasks. **The correct model is a real Git clone** (not a copy that strips `.git`), so edits can be committed and pushed back.
 
-**The correct model is a real Git clone** (not a copy that strips `.git`), so edits can be committed and pushed back:
+### Layer 1: Agnostic Skills (public, no PAT required)
+
+The agnostic skills repo contains the operating contract, setup guides, session bootstrap, and all general-purpose skills. It is public and works for any team or individual.
 
 ```bash
-# Clone the team's skills repo (URL provided by user)
-cd ~ && git clone https://github.com/<org>/skills.git ~/skills
+# Clone the agnostic skills repo
+cd ~ && git clone https://github.com/gerardotrevino/agnostic-cloud-computer-skills.git ~/skills
 
 # Set repo-local identity
 cd ~/skills && git config user.name "[git-username]" && git config user.email "[git-email]"
@@ -355,13 +357,18 @@ mempalace mine ~/skills/
 mempalace mine ~/AGENTS.md
 ```
 
-If the team has a second private skills repo (e.g., for sensitive organizational data or executive context), clone it to a separate directory:
+### Layer 2: Organization-Specific Skills (private, optional)
+
+If the team has a private skills repo containing internal tooling, proprietary workflows, or sensitive context, clone it alongside the agnostic skills:
 
 ```bash
-git clone https://github.com/<org>/executive-skills.git ~/projects/executive-skills
+# Requires a PAT in ~/.git-credentials for the private org
+git clone https://github.com/<org>/skills.git ~/org-skills
+cd ~/org-skills && git config user.name "[git-username]" && git config user.email "[git-email]"
+mempalace mine ~/org-skills/
 ```
 
-Do not merge repos — keep them separate for access control.
+Do not merge repos — keep them separate for access control. The agnostic skills in `~/skills` are always the base layer. Org-specific skills in `~/org-skills` extend or override them for that team's context.
 
 ---
 
