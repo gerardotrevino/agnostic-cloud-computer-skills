@@ -1,6 +1,6 @@
 ---
 name: agent-operating-contract
-description: The master operating contract for all agents working on any software project. Defines identity, principles, workflow phases, and hard rules. Fully agnostic — works for any organization, team, or project type.
+description: The master operating contract for all AI agents working on any software project. Defines identity, principles, workflow phases, and hard rules. Agnostic — works for any organization or project type.
 author: Gerardo Treviño (Paybook, Inc.)
 created: 2026-06-27
 ---
@@ -83,6 +83,38 @@ For every non-trivial task, follow these phases in order. Do not skip phases.
 ## 7. Memory and Context (MemPalace)
 
 The project `docs/` directory committed to Git is the durable source of truth for all project context — PRDs, architecture decisions, API references, session logs, and ADRs. MemPalace is the semantic search index over those files. The palace is local and machine-specific — it is never committed to Git. It is always rebuildable by running `mempalace mine` against the `docs/` directory.
+
+**Installation (canonical method — no alternatives):**
+
+```bash
+# Install via uv (the only supported method)
+uv tool install mempalace
+
+# Verify it lands in ~/.local/bin
+export PATH="$HOME/.local/bin:$PATH"
+mempalace --version
+
+# Add to shell profile permanently
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+```
+
+MemPalace must be installed via `uv tool install` and must reside at `~/.local/bin/mempalace`. Do not install it via `pip install` into a project venv, do not install it to `/usr/local/bin`, and do not share a venv with other tools. The `uv tool` method provides isolation and a predictable path across all machines.
+
+**Initialization (required before first use on any project):**
+
+```bash
+# Create identity (required once per machine)
+mkdir -p ~/.mempalace
+echo "<Developer Name>\n<Organization>\n<Role>" > ~/.mempalace/identity.txt
+
+# Initialize a wing for each project
+mempalace init ~/projects/<project-name>
+
+# Seed the wing with project context
+mempalace mine ~/projects/<project-name>
+```
+
+A machine without a populated MemPalace is not fully set up. If `mempalace wake-up` reports "No palace found" or returns an error, the agent must run `init` and `mine` before proceeding with any project work.
 
 **How multi-developer context sync works:** Git is the sync layer, not MemPalace. When a developer commits and pushes their session log, ADR, or any `docs/` update, other developers pull that content and run `mempalace mine` to rebuild their local index with the new knowledge. The palace on every machine reflects the full shared context of the team — but only if every developer pushes their `docs/` changes to Git.
 
@@ -171,7 +203,7 @@ When the task is to create a new project, follow these steps in order. Do not sk
 
 2. **Claim a port block.** Read `~/projects/PORT_REGISTRY.md` on the cloud computer and claim the next available port block (10 ports). Update the registry immediately. Never start a project without a registered port block.
 
-3. **Scaffold using `new-project.sh`.** Run `~/projects/new-project.sh <name> <template> <port>` on the cloud computer. Never create project files manually — the scaffold creates the correct structure including `docker-compose.yml`, `docs/`, `.env.example`, `Dockerfile`, `docs/README.md`, and `AGENTS.md`. Populate `docs/README.md` and `AGENTS.md` with real content before any feature development begins (see Section 15).
+3. **Scaffold using `new-project.sh`.** Run `~/projects/new-project.sh <name> <template> <port>` on the cloud computer. Never create project files manually — the scaffold creates the correct structure including `docker-compose.yml`, `docs/`, `.env.example`, and `Dockerfile`.
 
 4. **Create the GitHub repo.** Create the remote repo before writing any code. Push the scaffolded structure as the first commit. The repo is the source of truth from the first moment.
 
@@ -188,54 +220,3 @@ When the task is to create a new project, follow these steps in order. Do not sk
 10. **Mine into MemPalace.** Run `mempalace mine ~/projects/<name>` to index the initial scaffold and docs into the palace.
 
 The scaffold, the registry, the GitHub repo, and the MemPalace wing must all exist before any feature development begins. The project must be fully self-contained — no external service dependencies outside its own `docker-compose.yml`.
-
-## 15. Project Onboarding Documents (Mandatory)
-
-Every project must maintain two onboarding documents that are always current, always committed to Git, and always the first thing a new developer or agent reads. These are not optional documentation — they are operational requirements.
-
----
-
-### 15.1 `docs/README.md` — Human and Agent Onboarding
-
-This file is the entry point for any developer or agent arriving at the project for the first time. It must answer every question a new contributor needs to get productive within 10 minutes. It must be kept current — a stale README is worse than no README because it creates false confidence.
-
-**Required sections:**
-
-| Section | Content |
-|---------|---------|
-| **What this is** | One paragraph: what the project does, who it is for, and what problem it solves. No jargon. |
-| **How to run it** | Exact commands from a clean clone to a running environment. Must work. If it does not work, fix it before committing. |
-| **Directory structure** | A tree or table of the top-level directories and what each contains. |
-| **Environment variables** | What `.env` variables are required, what they do, and where to get their values. Reference `.env.example`. |
-| **Docs knowledge base** | A table of all files in `docs/` and what each one contains. This is how a new agent finds the PRD, architecture decisions, API reference, and session history. |
-| **Current state** | One paragraph: what stage the project is at, what is actively being built, and what the next milestone is. Update this every session. |
-| **Key contacts** | Who owns this project and how to reach them. |
-
----
-
-### 15.2 `AGENTS.md` (project-level) — Agent-Specific Instructions
-
-Every project repo must contain an `AGENTS.md` at its root. This file is read by agents at the start of every session alongside the machine-level `~/AGENTS.md`. It contains project-specific rules and live state that extend the machine-level contract.
-
-The machine-level `~/AGENTS.md` governs the environment. The project-level `AGENTS.md` governs this specific codebase.
-
-**Required sections:**
-
-| Section | Content |
-|---------|---------|
-| **Project identity** | Name, one-line description, GitHub repo URL, current version or milestone. |
-| **Current state** | What is in progress right now, what branch is active, what was last completed. Update every session. |
-| **Architecture summary** | Services, their ports, their responsibilities, and how they communicate. One table is sufficient. |
-| **Do not touch without asking** | Explicit list of files, services, or areas that require user authorization before modification. |
-| **Known gotchas** | Anything that has caused confusion or bugs in the past — environment quirks, non-obvious dependencies, ordering requirements. |
-| **Project-specific rules** | Any rules that extend or override the machine-level contract for this project specifically. |
-
-**Update discipline:** The project-level `AGENTS.md` must be updated at the end of every session that changes the project state. It is committed and pushed as part of the end-of-session protocol alongside the session log. An `AGENTS.md` that reflects last week's state is a liability, not an asset.
-
----
-
-### 15.3 Creation Requirement
-
-Both documents must be created as part of the new project scaffold (Section 14, step 3). The `new-project.sh` script must generate them with placeholder content. They must be populated with real content before the first feature development session begins — not after.
-
-A project without a current `docs/README.md` and a current `AGENTS.md` is not considered properly initialized, regardless of how much code it contains.
