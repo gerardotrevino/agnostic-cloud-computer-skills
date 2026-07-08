@@ -1,7 +1,7 @@
 ---
 name: agent-operating-contract
 description: The master operating contract for all AI agents working on any software project. Defines identity, principles, workflow phases, and hard rules. Agnostic — works for any organization or project type.
-author: Gerardo Treviño (Paybook, Inc.)
+author: Gerardo Treviño
 created: 2026-06-27
 ---
 
@@ -203,7 +203,7 @@ When the task is to create a new project, follow these steps in order. Do not sk
 
 2. **Claim a port block.** Read `~/projects/PORT_REGISTRY.md` on the cloud computer and claim the next available port block (10 ports). Update the registry immediately. Never start a project without a registered port block.
 
-3. **Scaffold using `new-project.sh`.** Run `~/projects/new-project.sh <name> <template> <port>` on the cloud computer. Never create project files manually — the scaffold creates the correct structure including `docker-compose.yml`, `docs/`, `.env.example`, and `Dockerfile`.
+3. **Scaffold using `new-project.sh`.** Run `~/projects/new-project.sh <name> <template> <port>` on the cloud computer. Never create project files manually — the scaffold creates the correct structure including `docker-compose.yml`, `docs/`, `.env.example`, `Dockerfile`, `docs/README.md`, and `AGENTS.md`. Populate `docs/README.md` and `AGENTS.md` with real content before any feature development begins (see Section 15).
 
 4. **Create the GitHub repo.** Create the remote repo before writing any code. Push the scaffolded structure as the first commit. The repo is the source of truth from the first moment.
 
@@ -220,3 +220,148 @@ When the task is to create a new project, follow these steps in order. Do not sk
 10. **Mine into MemPalace.** Run `mempalace mine ~/projects/<name>` to index the initial scaffold and docs into the palace.
 
 The scaffold, the registry, the GitHub repo, and the MemPalace wing must all exist before any feature development begins. The project must be fully self-contained — no external service dependencies outside its own `docker-compose.yml`.
+
+---
+
+## 15. Project Onboarding Documents (Mandatory)
+
+Every project must maintain two onboarding documents that are always current, always committed to Git, and always the first thing a new developer or agent reads. These are not optional documentation — they are operational requirements.
+
+---
+
+### 15.1 `docs/README.md` — Human and Agent Onboarding
+
+This file is the entry point for any developer or agent arriving at the project for the first time. It must answer every question a new contributor needs to get productive within 10 minutes. It must be kept current — a stale README is worse than no README because it creates false confidence.
+
+**Required sections:**
+
+| Section | Content |
+|---------|----------|
+| **What this is** | One paragraph: what the project does, who it is for, and what problem it solves. No jargon. |
+| **How to run it** | Exact commands from a clean clone to a running environment. Must work. If it does not work, fix it before committing. |
+| **Directory structure** | A tree or table of the top-level directories and what each contains. |
+| **Environment variables** | What `.env` variables are required, what they do, and where to get their values. Reference `.env.example`. |
+| **Docs knowledge base** | A table of all files in `docs/` and what each one contains. This is how a new agent finds the PRD, architecture decisions, API reference, and session history. |
+| **Current state** | One paragraph: what stage the project is at, what is actively being built, and what the next milestone is. Update this every session. |
+| **Key contacts** | Who owns this project and how to reach them. |
+
+---
+
+### 15.2 `AGENTS.md` (project-level) — Agent-Specific Instructions
+
+Every project repo must contain an `AGENTS.md` at its root. This file is read by agents at the start of every session alongside the machine-level `~/AGENTS.md`. It contains project-specific rules and live state that extend the machine-level contract.
+
+The machine-level `~/AGENTS.md` governs the environment. The project-level `AGENTS.md` governs this specific codebase.
+
+**Required sections:**
+
+| Section | Content |
+|---------|----------|
+| **Project identity** | Name, one-line description, GitHub repo URL, current version or milestone. |
+| **Current state** | What is in progress right now, what branch is active, what was last completed. Update every session. |
+| **Architecture summary** | Services, their ports, their responsibilities, and how they communicate. One table is sufficient. |
+| **Do not touch without asking** | Explicit list of files, services, or areas that require user authorization before modification. |
+| **Known gotchas** | Anything that has caused confusion or bugs in the past — environment quirks, non-obvious dependencies, ordering requirements. |
+| **Project-specific rules** | Any rules that extend or override the machine-level contract for this project specifically. |
+
+**Update discipline:** The project-level `AGENTS.md` must be updated at the end of every session that changes the project state. It is committed and pushed as part of the end-of-session protocol alongside the session log. An `AGENTS.md` that reflects last week's state is a liability, not an asset.
+
+---
+
+### 15.3 Creation Requirement
+
+Both documents must be created as part of the new project scaffold (Section 14, step 3). The `new-project.sh` script must generate them with placeholder content. They must be populated with real content before the first feature development session begins — not after.
+
+A project without a current `docs/README.md` and a current `AGENTS.md` is not considered properly initialized, regardless of how much code it contains.
+
+---
+
+## 16. Multi-Disciplinary Projects (Hub-and-Spoke Model)
+
+Some projects span multiple disciplines — engineering, legal, marketing, finance, sales, operations. When a project has more than one discipline with separate access control needs, it uses the **hub-and-spoke model** instead of a single repository.
+
+---
+
+### 16.1 When to Use This Model
+
+At project creation time, determine whether the project is:
+
+- **Single-discipline (engineering only):** One repo, standard scaffold (Section 14). Done.
+- **Multi-disciplinary:** Create a hub repo first, then create discipline repos (spokes) as each discipline begins active work.
+
+The decision point is access control: if different people need access to different parts of the project's knowledge, the project needs separate repos. If everyone sees everything, a single repo is sufficient.
+
+---
+
+### 16.2 The Hub Repo
+
+The hub is the coordination layer. It contains only what crosses disciplines:
+
+| Content | Purpose |
+|---------|----------|
+| `MANIFEST.md` | Registry of all repos in the project — name, discipline, purpose, access level |
+| `docs/PRD.md` or business model | What the project is building and why |
+| `docs/cross-discipline/` | Summaries written by each discipline for the others |
+| `docs/decisions/` | ADRs that affect multiple disciplines |
+| `docs/sessions/` | Cross-discipline coordination session logs |
+| `AGENTS.md` | Hub-level agent instructions including the MemPalace wing map |
+| `docs/README.md` | Hub onboarding (Section 15 applies) |
+
+The hub does not contain any discipline's work product. It does not contain code, legal filings, financial models, or marketing assets. Those live in their respective spoke repos.
+
+---
+
+### 16.3 Spoke Repos (Discipline Repos)
+
+Each spoke is a self-contained project that follows the full operating contract independently:
+
+- Each spoke has its own `AGENTS.md` and `docs/README.md` (Section 15 applies to every spoke)
+- Engineering spokes have `docker-compose.yml` and claim port blocks (Section 12 and 14 apply)
+- Non-engineering spokes (legal, marketing, finance) do not need Docker or port blocks but must have `docs/`, session logs, and MemPalace wings
+- Each spoke has its own MemPalace wing
+
+---
+
+### 16.4 `MANIFEST.md` — The Project Registry
+
+The hub must contain a `MANIFEST.md` at its root that lists every repo in the project:
+
+```markdown
+# [Project Name] — Project Manifest
+
+| Repo | Discipline | Purpose | Access |
+|------|-----------|---------|--------|
+| org/project | Hub | Cross-discipline coordination | Everyone |
+| org/project-engineering | Engineering | Software development | Engineering team |
+| org/project-legal | Legal | IP, contracts, compliance | Legal + founders |
+| org/project-marketing | Marketing | Brand, campaigns, content | Marketing + founders |
+```
+
+When a new discipline repo is created, it is added to `MANIFEST.md` immediately.
+
+---
+
+### 16.5 Cross-Discipline Context Flow
+
+Each discipline maintains a summary document in the hub's `docs/cross-discipline/` directory. This document is written for the other teams and contains only what they need to know — no privileged detail.
+
+Examples:
+- `legal-summary.md` — IP constraints that affect engineering (what cannot be open-sourced, what features are patent-protected)
+- `engineering-summary.md` — Technical architecture that affects legal (what is novel, what is prior art)
+- `finance-summary.md` — Budget constraints that affect all teams
+
+These summaries are the bridge between disciplines. An engineering agent reads the hub + engineering spoke and gets legal constraints without seeing privileged attorney correspondence.
+
+---
+
+### 16.6 MemPalace Wing Map
+
+The hub `AGENTS.md` must document which repos each role mines:
+
+| Role | Mines | Gets |
+|------|-------|------|
+| Founder/Lead | Hub + all spokes | Full picture |
+| Engineering agent | Hub + engineering spoke | PRD + legal summary + code |
+| Legal agent | Hub + legal spoke | PRD + engineering summary + privileged legal docs |
+
+An agent must never mine a spoke it does not have access to. The cross-discipline summaries in the hub provide the necessary context without exposing privileged information.
