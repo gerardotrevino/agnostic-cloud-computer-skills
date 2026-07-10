@@ -275,3 +275,85 @@ Both documents must be created as part of the new project scaffold (Section 14, 
 A project without a current `docs/README.md` and a current `AGENTS.md` is not considered properly initialized, regardless of how much code it contains.
 
 
+
+
+---
+
+## 16. Software Development Lifecycle (Mandatory)
+
+Every software development task — regardless of size, stack, or project — must follow a structured lifecycle. The purpose is to guarantee that work is fully understood before it begins, fully verified before it is marked complete, and fully documented before the session ends. Partial completion disguised as "done" is a contract violation.
+
+**The mandatory phases:**
+
+| Phase | Gate | What Must Happen |
+|-------|------|------------------|
+| 1. **Understand** | Cannot proceed without | Read ALL required context (PRD, architecture, related ADRs, existing code). If context does not exist, create it or ask for it before writing any code. |
+| 2. **Plan** | User approval for non-trivial changes | Break the work into granular tasks with clear acceptance criteria. Identify dependencies, risks, and affected areas. |
+| 3. **Design** | Required for new features or architecture changes | Document the approach — data models, API contracts, component structure — before implementing. |
+| 4. **Implement** | Must follow the plan | Write the code following the approved plan and the project's conventions. |
+| 5. **Test** | Must pass before proceeding | Write and run tests appropriate to the change (unit, integration, E2E). A feature without tests is not complete. |
+| 6. **Verify** | Must confirm against original requirements | Compare the output against the acceptance criteria from Phase 2. Every criterion must be met. If any are not met, the task is not done — go back to Phase 4. |
+| 7. **Document** | Must be done as part of the task | Update relevant docs (README, architecture, API reference, session log). Documentation is not a follow-up task — it is part of completion. |
+| 8. **Deploy** | Health check must pass | Follow the project's deployment process. Verify the deployed service is healthy. |
+
+**The verification rule (non-negotiable):**
+
+A task is complete ONLY when:
+1. All acceptance criteria from the plan are verified as met
+2. Tests exist and pass
+3. Documentation is updated
+4. The deployed service is healthy (if applicable)
+
+Marking a task as done without satisfying all four conditions is equivalent to claiming completion without verification (Section 2) — it is a contract violation.
+
+**The quality standard:**
+
+All development work must comply with the `software-engineering-standards` skill. This skill defines the detailed build sequence, quality gates, testing requirements, security standards, and verification processes. It is not optional guidance — it is the executable standard that this contract mandates. Non-compliance with the skill is non-compliance with this contract.
+
+---
+
+## 17. Mandatory Skills
+
+Skills are the executable standards that define HOW work is performed. The contract defines WHAT must be done; skills define HOW to do it. Two levels of mandatory skills exist:
+
+---
+
+### 17.1 Global Mandatory Skills (All Projects)
+
+The following skills must be read and followed by every agent on every project, every session. They are not optional. They are not "nice to have." They are contract-level requirements.
+
+| Skill | Purpose | When to Read |
+|-------|---------|--------------|
+| `software-engineering-standards` | Defines the build sequence, quality gates, testing requirements, security standards, and verification processes for all software development | Before any development work begins |
+
+This list may grow as new universal standards are established. A skill is promoted to global mandatory status only when it applies to ALL projects regardless of domain, stack, or team.
+
+---
+
+### 17.2 Project Mandatory Skills (Per Project)
+
+Each project's `AGENTS.md` must include a **Required Skills** section listing the skills that are mandatory for that specific project. These are skills that apply to the project's domain, stack, or conventions but are not universal.
+
+**Example:**
+
+```markdown
+## Required Skills
+
+| Skill | Purpose |
+|-------|---------|
+| `software-engineering-standards` | Global — always required |
+| `aula-design-system` | Project-specific design tokens and component library |
+| `sat-connector` | SAT integration patterns for Mexican tax compliance |
+```
+
+**Rules:**
+1. Agents must read ALL listed skills before beginning any work on the project.
+2. A project that does not list its required skills in `AGENTS.md` is not properly onboarded (Section 15 violation).
+3. Non-compliance with a project mandatory skill is equivalent to non-compliance with this contract.
+4. When a skill is used successfully across 3+ projects, it should be evaluated for promotion to global mandatory status.
+
+---
+
+### 17.3 Skill Discovery (Continuous)
+
+Beyond mandatory skills, agents must proactively discover relevant skills using the `internet-skill-finder` skill (Section 4) when encountering unfamiliar domains or tools. Discovered skills that prove valuable should be recommended for addition to the project's required skills list.
