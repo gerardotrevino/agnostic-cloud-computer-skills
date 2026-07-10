@@ -2,9 +2,8 @@
 name: cloud-computer-setup
 description: Complete guide for agents to provision a new cloud computer with Docker, MemPalace, and a multi-project architecture. Agnostic instructions — works for any team, organization, or project type.
 metadata:
-  author: Gerardo Treviño
+  author: Gerardo Treviño Rojas
   contributors: []
-  organization: Paybook, Inc.
   created: 2026-06-27
   version: "2.2"
 ---
@@ -53,7 +52,13 @@ sudo apt-get install -y make jq git htop tree curl wget software-properties-comm
 curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
 sudo usermod -aG docker ubuntu
+sudo systemctl enable docker
 rm get-docker.sh
+
+# Verify Docker daemon is running and will start on reboot
+sudo systemctl start docker
+docker --version
+docker compose version
 
 # Install Python 3.12, pip, and uv
 sudo apt-get install -y python3.12 python3-pip python3.12-venv
@@ -106,10 +111,12 @@ uv tool install mempalace
 # Configure identity — replace with real values from user
 mkdir -p ~/.mempalace
 cat > ~/.mempalace/identity.txt << 'EOF'
-Name: [Developer Name]
-Organization: [Organization Name]
-Role: [Developer Role]
-Cloud Computer: [Device ID or hostname]
+name: [Developer Name]
+email: [Developer Email]
+github: [GitHub Username]
+role: [Developer Role]
+org: [Organization Name]
+machine: [Device ID or hostname]
 EOF
 
 # Initialize the dev_environment wing

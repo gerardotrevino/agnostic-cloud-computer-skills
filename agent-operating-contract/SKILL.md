@@ -77,7 +77,7 @@ For every non-trivial task, follow these phases in order. Do not skip phases.
 | Open firewall ports | ⚠️ Ask First |
 | Merge or resolve conflicts | ⚠️ Ask First — show diff, get explicit authorization |
 | Commit secrets, API keys, or PATs | 🚫 Never |
-| Push directly to main branch | 🚫 Never |
+| Push directly to main branch | 🚫 Never (developer may override per-session with explicit verbal confirmation — override must be noted in session log) |
 | Force-push to any branch | 🚫 Never |
 | Skip research or planning phases | 🚫 Never |
 | Claim completion without running verification | 🚫 Never |

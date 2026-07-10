@@ -43,7 +43,7 @@ Use Conventional Commits format:
 | `fix/{name}` | Bug fixes | `develop` or `main` |
 | `hotfix/{name}` | Production emergency fixes | `main` directly |
 
-For small teams or solo projects, trunk-based development (commit directly to `main`) is acceptable with CI gates.
+**Direct pushes to `main` are prohibited.** All work happens on feature branches, regardless of team size. This is mandated by the operating contract Section 6. The developer may override this per-session by explicit verbal request (see session-bootstrap skill).
 
 ## Pull Request Workflow
 

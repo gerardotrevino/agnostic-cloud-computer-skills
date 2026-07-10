@@ -1,11 +1,29 @@
 ---
 name: software-engineering-standards
 description: Universal software engineering best practices, architecture principles, and quality standards applicable to any project regardless of stack or domain. Use when starting a new project, reviewing code, setting up CI/CD, designing architecture, writing tests, implementing security, creating design systems, managing documentation, or establishing team conventions. Distilled from enterprise-grade production systems.
+metadata:
+  author: Gerardo Treviño Rojas
+  contributors: []
+  created: 2026-06-27
+  version: "2.0"
 ---
 
 # Software Engineering Standards
 
+> **This skill is mandated by the operating contract Section 17.1 (Global Mandatory Skills).** All agents must read and comply with this skill before any development work begins. Non-compliance is a contract violation.
+
 Universal best practices for building production-grade software. These principles are stack-agnostic and apply to any project.
+
+## Completion Standard
+
+A task is NOT complete until:
+1. All acceptance criteria are verified (not assumed)
+2. Tests pass (unit + integration at minimum)
+3. Documentation is updated (not deferred)
+4. The service is healthy in Docker
+5. The code is on a feature branch with CI passing
+
+Marking a task done without satisfying all five conditions is a contract violation (Section 16).
 
 ## 12 Architecture Principles
 
