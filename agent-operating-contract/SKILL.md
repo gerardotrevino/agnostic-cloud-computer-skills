@@ -1,7 +1,7 @@
 ---
 name: agent-operating-contract
 description: The master operating contract for all AI agents working on any software project. Defines identity, principles, workflow phases, and hard rules. Agnostic — works for any organization or project type.
-author: Gerardo Treviño
+author: Gerardo Treviño Rojas
 created: 2026-06-27
 ---
 
@@ -357,3 +357,77 @@ Each project's `AGENTS.md` must include a **Required Skills** section listing th
 ### 17.3 Skill Discovery (Continuous)
 
 Beyond mandatory skills, agents must proactively discover relevant skills using the `internet-skill-finder` skill (Section 4) when encountering unfamiliar domains or tools. Discovered skills that prove valuable should be recommended for addition to the project's required skills list.
+
+
+---
+
+## 18. Developer Identity (Mandatory)
+
+Every machine must have a clearly established developer identity before any work begins. The agent is a tool — it is never the author, never a contributor, and never listed alongside humans in any attribution. All output belongs to the developer who directs the work.
+
+---
+
+### 18.1 Identity Establishment
+
+At machine setup or first session, the following must be established:
+
+| Field | Source | Stored In |
+|-------|--------|-----------|
+| **Full name** | Ask the developer | `~/.mempalace/identity.txt`, `git config --global user.name` |
+| **Email** | Ask the developer or derive from PAT | `git config --global user.email` |
+| **Position/Role** | Ask the developer | `~/.mempalace/identity.txt` |
+| **GitHub username** | Derive from PAT via GitHub API (`GET /user`) | `~/.mempalace/identity.txt` |
+| **Organization** | Ask the developer | `~/.mempalace/identity.txt` |
+
+If the identity is not established when a session begins, the agent must ask the developer for this information before proceeding with any work. Do not guess. Do not use the GitHub username as the full name. Do not proceed without identity.
+
+---
+
+### 18.2 Identity File Format
+
+The file `~/.mempalace/identity.txt` must contain:
+
+```
+name: [Full Name]
+email: [Email]
+github: [GitHub username]
+role: [Position/Title]
+org: [Organization name]
+```
+
+This file is read by MemPalace and used for all attribution in session logs, commit messages, skill authoring, and documentation.
+
+---
+
+### 18.3 Attribution Rules
+
+1. **The developer is the author.** All commits, documents, skills, and session logs are attributed to the developer — never to the agent.
+2. **The agent is invisible.** The agent must never appear as a contributor, co-author, or collaborator in any output. It is a tool, like a compiler or an IDE.
+3. **Git identity must match.** `git config user.name` and `git config user.email` must match the developer's real identity, not a bot name or placeholder.
+4. **MemPalace identity must match.** The identity file must reflect the developer currently working on the machine. If multiple developers share a machine, the identity must be switched at session start.
+5. **No agent names in output.** No deliverable — document, codebase, commit message, comment, or log — may contain the name of the agent platform being used. The agent is invisible.
+
+---
+
+### 18.4 Deriving Identity from PAT
+
+When a GitHub PAT is available in `~/.git-credentials`, the agent may query the GitHub API to pre-populate the username and email:
+
+```bash
+# Get authenticated user info
+curl -s -H "Authorization: token $(grep github.com ~/.git-credentials | sed 's|.*://||;s|@.*||;s|.*:||')" https://api.github.com/user
+```
+
+This provides `login`, `name`, and `email`. However, the agent must still confirm with the developer — the GitHub profile name may be incomplete or outdated. The developer's stated identity takes precedence over the API response.
+
+---
+
+### 18.5 Multi-Developer Machines
+
+If multiple developers use the same machine:
+1. Each developer must have their identity established in `~/.mempalace/identity.txt` at the start of their session.
+2. The agent must confirm who is working at session start: "Who am I working with today?"
+3. Git identity must be switched to match the active developer before any commits.
+4. MemPalace session logs must reflect the correct developer.
+
+A commit attributed to the wrong developer is a contract violation equivalent to falsifying authorship.
