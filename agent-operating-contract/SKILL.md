@@ -154,7 +154,15 @@ When creating or updating a general-purpose skill that would benefit other agent
 
 ---
 
-## 10. Document Authorship and Agent Invisibility
+## 7. Cross-Project Context Rule (Mandatory)
+
+If a design conversation, architectural decision, or any project-specific context is discussed in an infrastructure session (or any other session), that context MUST be copied into the target project's `docs/` directory (e.g., as a `design-context.md` or ADR) and pushed to its repo before the session ends. 
+
+A project must never rely on another project's session logs to understand its own architecture. Every project must be fully self-contained. If you discuss the design of Project A while working in the repo of Project B, you have not finished your work until you have written those design decisions into Project A's repository.
+
+---
+
+## 8. Document Authorship and Agent Invisibility
 
 When creating a new document, set the author to the current user's name (ask if not known). When editing an existing document that already has an author, keep the original author, add the current user as a contributor, and update the "Last Modified" date. Never overwrite authorship silently.
 
@@ -162,13 +170,13 @@ When creating a new document, set the author to the current user's name (ask if 
 
 ---
 
-## 11. Communication Style
+## 9. Communication Style
 
 Ask one question at a time — never dump a list of questions. Provide brief progress updates during long operations. When something fails, explain what failed, why it failed, and the proposed fix — never just paste a raw error message. Never end a session without a clear summary of what was accomplished and what the next step is.
 
 ---
 
-## 12. Docker Compose is Mandatory for All Projects (Non-Negotiable)
+## 10. Docker Compose is Mandatory for All Projects (Non-Negotiable)
 
 No project application service runs directly on the host machine (bare metal). Every project — its web servers, workers, schedulers, and any runtime process — MUST run as a Docker Compose service.
 
@@ -182,7 +190,7 @@ Every project MUST have a `docker-compose.yml` at its root that defines **all** 
 
 ---
 
-## 13. Cloud Computer Execution Priority (Non-Negotiable)
+## 11. Cloud Computer Execution Priority (Non-Negotiable)
 
 The sandbox (temporary session environment) is ephemeral — it is wiped at the end of every session. The cloud computer is persistent — its filesystem, installed tools, Docker containers, MemPalace palace, and git repos survive indefinitely across sessions.
 
@@ -200,7 +208,7 @@ The reason is absolute: context lost in the sandbox is gone forever. Context on 
 
 ---
 
-## 14. New Project Creation Protocol
+## 12. New Project Creation Protocol
 
 When the task is to create a new project, follow these steps in order. Do not skip any step.
 
@@ -228,13 +236,13 @@ The scaffold, the registry, the GitHub repo, and the MemPalace wing must all exi
 
 ---
 
-## 15. Project Onboarding Documents (Mandatory)
+## 13. Project Onboarding Documents (Mandatory)
 
 Every project must maintain two onboarding documents that are always current, always committed to Git, and always the first thing a new developer or agent reads. These are not optional documentation — they are operational requirements.
 
 ---
 
-### 15.1 `docs/README.md` — Human and Agent Onboarding
+### 13.1 `docs/README.md` — Human and Agent Onboarding
 
 This file is the entry point for any developer or agent arriving at the project for the first time. It must answer every question a new contributor needs to get productive within 10 minutes. It must be kept current — a stale README is worse than no README because it creates false confidence.
 
@@ -252,7 +260,7 @@ This file is the entry point for any developer or agent arriving at the project 
 
 ---
 
-### 15.2 `AGENTS.md` (project-level) — Agent-Specific Instructions
+### 13.2 `AGENTS.md` (project-level) — Agent-Specific Instructions
 
 Every project repo must contain an `AGENTS.md` at its root. This file is read by agents at the start of every session alongside the machine-level `~/AGENTS.md`. It contains project-specific rules and live state that extend the machine-level contract.
 
@@ -273,9 +281,9 @@ The machine-level `~/AGENTS.md` governs the environment. The project-level `AGEN
 
 ---
 
-### 15.3 Creation Requirement
+### 13.3 Creation Requirement
 
-Both documents must be created as part of the new project scaffold (Section 14, step 3). The `new-project.sh` script must generate them with placeholder content. They must be populated with real content before the first feature development session begins — not after.
+Both documents must be created as part of the new project scaffold (Section 12, step 3). The `new-project.sh` script must generate them with placeholder content. They must be populated with real content before the first feature development session begins — not after.
 
 A project without a current `docs/README.md` and a current `AGENTS.md` is not considered properly initialized, regardless of how much code it contains.
 
@@ -284,7 +292,7 @@ A project without a current `docs/README.md` and a current `AGENTS.md` is not co
 
 ---
 
-## 16. Software Development Lifecycle (Mandatory)
+## 14. Software Development Lifecycle (Mandatory)
 
 Every software development task — regardless of size, stack, or project — must follow a structured lifecycle. The purpose is to guarantee that work is fully understood before it begins, fully verified before it is marked complete, and fully documented before the session ends. Partial completion disguised as "done" is a contract violation.
 
@@ -317,13 +325,13 @@ All development work must comply with the `software-engineering-standards` skill
 
 ---
 
-## 17. Mandatory Skills
+## 15. Mandatory Skills
 
 Skills are the executable standards that define HOW work is performed. The contract defines WHAT must be done; skills define HOW to do it. Two levels of mandatory skills exist:
 
 ---
 
-### 17.1 Global Mandatory Skills (All Projects)
+### 15.1 Global Mandatory Skills (All Projects)
 
 The following skills must be read and followed by every agent on every project, every session. They are not optional. They are not "nice to have." They are contract-level requirements.
 
@@ -335,7 +343,7 @@ This list may grow as new universal standards are established. A skill is promot
 
 ---
 
-### 17.2 Project Mandatory Skills (Per Project)
+### 15.2 Project Mandatory Skills (Per Project)
 
 Each project's `AGENTS.md` must include a **Required Skills** section listing the skills that are mandatory for that specific project. These are skills that apply to the project's domain, stack, or conventions but are not universal.
 
