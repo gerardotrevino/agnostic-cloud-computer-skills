@@ -151,6 +151,7 @@ When creating or updating a general-purpose skill that would benefit other agent
 2. **Never force-push to a shared repo under any circumstance.** Force-push rewrites history that other agents and developers may already have pulled. If a force-push seems necessary, stop — the correct action is to resolve the conflict forward, not rewrite the past.
 3. **Resolve conflicts before pushing, never after.** If a rebase produces conflicts: show the full diff to the user, explain what changed on each side, get explicit authorization to resolve, apply the resolution, verify the result is correct, then push. Never push a conflict marker into a shared repo.
 4. **Verify the pushed content is correct.** After every push to a shared repo, run `git show HEAD` or read the pushed file to confirm the content on the remote matches the intended change. Do not assume the push was correct without verification.
+5. **Audit contract edits.** If you modify this operating contract (or any core standard), you MUST perform a full file audit before pushing. Check that section numbering remains sequential, that internal cross-references still point to the correct sections, and that no orphaned or duplicate sections exist.
 
 ---
 
