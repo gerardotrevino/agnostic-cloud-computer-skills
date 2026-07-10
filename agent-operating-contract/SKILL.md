@@ -301,13 +301,14 @@ Every software development task — regardless of size, stack, or project — mu
 | Phase | Gate | What Must Happen |
 |-------|------|------------------|
 | 1. **Understand** | Cannot proceed without | Read ALL required context (PRD, architecture, related ADRs, existing code). If context does not exist, create it or ask for it before writing any code. |
-| 2. **Plan** | User approval for non-trivial changes | Break the work into granular tasks with clear acceptance criteria. Identify dependencies, risks, and affected areas. |
-| 3. **Design** | Required for new features or architecture changes | Document the approach — data models, API contracts, component structure — before implementing. |
-| 4. **Implement** | Must follow the plan | Write the code following the approved plan and the project's conventions. |
-| 5. **Test** | Must pass before proceeding | Write and run tests appropriate to the change (unit, integration, E2E). A feature without tests is not complete. |
-| 6. **Verify** | Must confirm against original requirements | Compare the output against the acceptance criteria from Phase 2. Every criterion must be met. If any are not met, the task is not done — go back to Phase 4. |
-| 7. **Document** | Must be done as part of the task | Update relevant docs (README, architecture, API reference, session log). Documentation is not a follow-up task — it is part of completion. |
-| 8. **Deploy** | Health check must pass | Follow the project's deployment process. Verify the deployed service is healthy. |
+| 2. **Research** | Required before building | Search the internet for open-source implementations, best practices, articles, and competitors. Do not assume you know the best way to build something. Find reusable code, shortcuts, and battle-tested patterns before reinventing the wheel. |
+| 3. **Plan** | User approval for non-trivial changes | Break the work into granular tasks with clear acceptance criteria based on your research. Identify dependencies, risks, and affected areas. |
+| 4. **Design** | Required for new features or architecture changes | Document the approach — data models, API contracts, component structure — before implementing. |
+| 5. **Implement** | Must follow the plan | Write the code following the approved plan and the project's conventions. |
+| 6. **Test** | Must pass before proceeding | Write and run tests appropriate to the change (unit, integration, E2E). A feature without tests is not complete. |
+| 7. **Verify** | Must confirm against original requirements | Compare the output against the acceptance criteria from Phase 3. Every criterion must be met. For UI components, this means **pixel-perfect visual and functional fidelity** (hover states, focus rings, resize handles, animations). If any are not met, the task is not done — go back to Phase 5. |
+| 8. **Document** | Must be done as part of the task | Update relevant docs (README, architecture, API reference, session log). Documentation is not a follow-up task — it is part of completion. |
+| 9. **Deploy** | Health check must pass | Follow the project's deployment process. Verify the deployed service is healthy. |
 
 **The verification rule (non-negotiable):**
 
