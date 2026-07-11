@@ -1,7 +1,7 @@
 # Cloud Computer Provisioning Skill
 
 **Author:** Manus AI
-**Organization:** 
+**Organization:** Paybook, Inc.
 
 This skill provides the step-by-step procedure for provisioning a new persistent cloud computer (Ubuntu VM) for a Paybook developer. Any agent tasked with setting up a new machine MUST follow this exact sequence to ensure consistency, security, and compliance with the operating contract.
 
@@ -10,7 +10,7 @@ This skill provides the step-by-step procedure for provisioning a new persistent
 Before executing any commands on the new machine, you MUST collect the developer's identity. If the user has not provided this information, use the `ask` tool to request it:
 
 1. **Name** (e.g., "Gerardo Treviño")
-2. **Organization / Role** (e.g., "")
+2. **Organization / Role** (e.g., "Paybook, Inc.")
 3. **Domain / Subdomain** (e.g., `g-cc-1.internal-services.network`)
 
 Do not proceed until you have the domain. It is required for the Caddy TLS setup.
@@ -38,26 +38,31 @@ Do not proceed until you have the domain. It is required for the Caddy TLS setup
    docker network create dev-shared
    ```
 
-2. **Clone the dev-infrastructure repo:**
+2. **Clone the shared-services repo (public, no PAT needed):**
    ```bash
    mkdir -p ~/projects
    cd ~/projects
-   git clone https://github.com/Paybook/dev-infrastructure.git shared-services
+   git clone https://github.com/gerardotrevino/cloud-computer-shared-services.git shared-services
    ```
-   *(If a PAT is needed and not in `~/.git-credentials`, ask the user).*
 
-3. **Configure Caddy with the developer's domain:**
-   Read `~/projects/shared-services/Caddyfile`. Replace all instances of the example domain with the actual domain provided by the developer.
+3. **Configure the developer's domain:**
+   Create the `.env` file (this is gitignored — machine-specific):
    ```bash
-   sed -i 's/example-domain.network/<actual-domain>/g' ~/projects/shared-services/Caddyfile
+   cd ~/projects/shared-services
+   echo "DEV_DOMAIN=<actual-domain>" > .env
    ```
+   Replace `<actual-domain>` with the domain the developer provided (e.g., `r-cc-1.internal-services.network`). The Caddyfile reads `{$DEV_DOMAIN}` from this file automatically — do NOT edit the Caddyfile itself.
 
 4. **Start shared services:**
    ```bash
    cd ~/projects/shared-services
    docker compose up -d
    ```
-   Verify that Postgres, Redis, Caddy, and Adminer are running.
+   Verify that Postgres, Redis, Caddy, and Adminer are running. Check Caddy logs:
+   ```bash
+   docker logs shared-caddy 2>&1 | grep -i "error\|domain\|certificate"
+   ```
+   You should see `enabling automatic TLS certificate management` with the correct domain.
 
 ## Phase 3: Firewall & Ports
 
