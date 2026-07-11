@@ -44,7 +44,9 @@ At the beginning of every session, before taking any execution steps, you MUST c
 7. **Verify environment.** Run `docker compose ps` in the project directory. If containers are not running or are unhealthy, start them with `docker compose up -d` and verify health before proceeding. If the project has a database, check for pending migrations and apply them.
 8. **Confirm scope.** Confirm the exact scope of the task with the user before writing any code.
 
-Do not begin implementation until all eight steps are complete. A session that skips environment verification will waste time debugging infrastructure instead of building features.
+9. **Enforce compliance.** After completing steps 1–8, verify that the current environment complies with ALL contract requirements. Check: Is Caddy TLS configured? Is the developer's domain declared? Is MemPalace initialized and mined? Are all project ports in the PORT_REGISTRY? Is Docker running all required services? If ANY requirement from this contract or its referenced skills is not met, execute the relevant skill or fix immediately — do not wait for the user to ask. Compliance is not optional and is never deferred. Report what was out of compliance and what you fixed.
+
+Do not begin implementation until all nine steps are complete. A session that skips environment verification or compliance enforcement will waste time debugging infrastructure instead of building features.
 
 ---
 
