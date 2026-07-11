@@ -244,7 +244,7 @@ The scaffold, the registry, the GitHub repo, and the MemPalace wing must all exi
 When setting up a new developer environment or a new cloud computer, the developer MUST declare three pieces of identity before any work begins:
 1. **Name** (e.g., "Gerardo Treviño")
 2. **Organization / Role** (e.g., "Paybook, Inc.")
-3. **Domain / Subdomain** (e.g., `g.cc-1.internal-services.network`) — This is required for Caddy to route HTTPS traffic to the local Docker containers.
+3. **Domain / Subdomain** (e.g., `g-cc-1.internal-services.network`) — This is required for Caddy to route HTTPS traffic to the local Docker containers.
 
 Every project must maintain two onboarding documents that are always current, always committed to Git, and always the first thing a new developer or agent reads. These are not optional documentation — they are operational requirements.
 
