@@ -68,17 +68,30 @@ Do not proceed until you have the domain. It is required for the Caddy TLS setup
 
 Configure UFW (Uncomplicated Firewall) to allow traffic. **Do not enable UFW blindly without allowing SSH (port 22) first, or you will lock everyone out.**
 
+**IMPORTANT:** We use **port-per-project routing**, NOT subdomain routing. Caddy listens on EACH project's external port (e.g., 8000, 8001, 8002, 8060, 8070) and serves HTTPS directly on those ports. These are NOT raw application ports — they are Caddy-managed HTTPS endpoints. They MUST be opened on UFW.
+
+The architecture is:
+- External (internet) → `https://domain:8000` → Caddy (HTTPS, port 8000) → `127.0.0.1:18000` (app, localhost only)
+- The app binds to `127.0.0.1:(PORT+10000)` — NEVER exposed to the internet
+- Caddy binds to `0.0.0.0:PORT` — this is the public HTTPS endpoint
+
+Therefore, open ALL ports that Caddy will serve on:
+
 ```bash
-sudo ufw allow 22/tcp
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
-sudo ufw allow 5050/tcp  # Adminer
+sudo ufw allow 22/tcp     # SSH
+sudo ufw allow 80/tcp     # Caddy HTTP→HTTPS redirect + ACME challenge
+sudo ufw allow 443/tcp    # Caddy default HTTPS (if needed)
+sudo ufw allow 5050/tcp   # Adminer (via Caddy HTTPS)
 ```
 
-If the developer is assigned specific project port blocks (e.g., Block 01: 8000-8009), open those as well:
+**You MUST also open every active project port block.** Check `~/projects/PORT_REGISTRY.md` for which blocks are in use. For example:
 ```bash
-sudo ufw allow 8000:8009/tcp
+sudo ufw allow 8000:8009/tcp   # Block 01 — Paybook Finances
+sudo ufw allow 8060:8069/tcp   # Block 07 — Paybook UI
+sudo ufw allow 8070:8079/tcp   # Block 08 — Syncfy 2.0
 ```
+
+Do NOT skip project ports thinking they should be "private." The private ports are the +10000 offset ones (18000, 18060, 18070) which are bound to localhost and never need UFW rules. The external ports (8000, 8060, 8070) are Caddy HTTPS endpoints and MUST be publicly accessible.
 
 Enable the firewall:
 ```bash
