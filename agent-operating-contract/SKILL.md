@@ -208,6 +208,20 @@ Every project MUST have a `docker-compose.yml` at its root that defines **all** 
 
 **Projects are fully self-contained.** No project may depend on services running outside its own Docker Compose stack. Each project defines its own PostgreSQL, Redis, or any other service it requires internally. This guarantees that any developer can clone the repo, run `docker compose up`, and have a fully running environment with zero external dependencies. Shared host-level services are not permitted as project dependencies.
 
+**Caddy TLS Proxy is Mandatory (Non-Negotiable).** All external web traffic MUST go through the Caddy reverse proxy with HTTPS. The architecture is:
+
+- Caddy listens on `0.0.0.0:PORT` (external, HTTPS) and proxies to `127.0.0.1:(PORT+10000)` (internal, localhost-only)
+- Applications bind to `127.0.0.1:(PORT+10000)` — NEVER to `0.0.0.0:PORT` directly
+- The developer's domain is configured in `~/projects/shared-services/.env` as `DEV_DOMAIN`
+
+**You MUST NEVER:**
+- Offer to stop, bypass, or disable Caddy for any reason
+- Expose application ports directly to the internet without Caddy
+- Suggest accessing services via raw HTTP when HTTPS is available
+- Offer "Option 2: direct HTTP" as an alternative — there is no alternative
+
+If Caddy is not running or not configured, fix it by following the `cloud-computer-provisioning` skill. If a project's containers are not running behind Caddy, start them on their internal ports (PORT+10000). The only valid way to access any service externally is `https://<domain>:<port>`.
+
 ---
 
 ## 14. Cloud Computer Execution Priority (Non-Negotiable)
