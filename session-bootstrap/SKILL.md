@@ -82,7 +82,7 @@ cd ~/org-skills && git pull --rebase origin main 2>/dev/null || true
 
 ### Step 5: Read Mandatory Skills
 
-Read all **global mandatory skills** (contract Section 17.1):
+Read all **global mandatory skills** (contract Section 18.1):
 
 | Skill | Path | When |
 |-------|------|------|
@@ -90,10 +90,27 @@ Read all **global mandatory skills** (contract Section 17.1):
 
 Then read the **project's `AGENTS.md`** and read all skills listed in its **Required Skills** section.
 
+**Two-tier skill locations (contract Section 18):**
+- **Global skills** live at `~/skills/` (shared org repo, pulled in Step 4)
+- **Project skills** live at `{project}/skills/` (inside the project repo, pulled in Step 6)
+
+After syncing the project (Step 6), read ALL skills in `{project}/skills/` that are listed in the project's AGENTS.md Required Skills table. If `{project}/skills/` exists but the AGENTS.md doesn't list them, read them anyway — their presence in the directory makes them applicable.
+
+**Privacy rule:** Project-specific skills are ONLY visible to agents working on that project. Do not reference or apply patterns from one project's skills to another project.
+
 ---
 
 ### Step 6: Sync Project
 
+**If `~/projects/<active-project>` does NOT exist (first-time clone):**
+```bash
+cd ~/projects
+git clone <github-url-from-project-instructions> <active-project>
+cd <active-project>
+```
+After cloning, read the project's `AGENTS.md`. If the project's Type is `documentation`, no further setup is needed — proceed to Step 7. For `software` or `hybrid` projects: if AGENTS.md contains a `First-Time Machine Setup` section, follow it completely until the project's health check passes. If it does NOT contain such a section, create one based on the project's `docker-compose.yml`, `.env.example`, and `Makefile` — then commit it. A cloned-but-not-running software project is NOT a valid starting state.
+
+**If `~/projects/<active-project>` already exists:**
 ```bash
 cd ~/projects/<active-project>
 git fetch origin
@@ -104,6 +121,15 @@ git status
 ```bash
 git pull --rebase origin main
 ```
+
+**After pulling, if new files arrived, re-mine MemPalace:**
+```bash
+# Check if pull brought new commits (git pull output says "X files changed")
+# If yes, re-mine to update the local search index:
+export PATH="$HOME/.local/bin:$PATH"
+mempalace mine ~/projects/<active-project>
+```
+The MemPalace index (`~/.mempalace/palace/`) is local to each machine — it is NOT stored in git. When another developer pushes new files, your machine's index is stale until you re-mine. Always re-mine after pulling if new content arrived.
 
 **If uncommitted changes or open branches exist from a previous session:**
 - Do NOT pull automatically
@@ -118,6 +144,11 @@ git pull --rebase origin main
 
 ### Step 7: Verify Environment
 
+**Type check:** Read the `Type` field from the project's AGENTS.md (set in the Project Identity section).
+- If `Type: documentation` → **skip this entire step** (no Docker, no CodeGraph, no health checks). Proceed directly to Step 8.
+- If `Type: hybrid` and no `docker-compose.yml` exists → skip this step.
+- If `Type: software` (or `hybrid` with `docker-compose.yml`) → continue below.
+
 ```bash
 cd ~/projects/<active-project>
 docker compose ps
@@ -125,15 +156,27 @@ docker compose ps
 
 **If containers are running and healthy:** Proceed.
 
-**If containers are not running:**
+**If containers are not running (but were previously created):**
 ```bash
 docker compose up -d
 ```
 Wait for all containers to be healthy. If any container fails to start, diagnose and fix before proceeding.
 
+**If containers do not exist at all (first-time setup):**
+This means the project was just cloned or has never been run on this machine. Follow the project's `AGENTS.md` `First-Time Machine Setup` section completely. This typically includes:
+1. Creating `.env` from `.env.example` with correct values for this machine's port block
+2. Building and starting all containers: `docker compose up -d --build`
+3. Verifying the health endpoint returns success
+4. Adding a Caddy entry to `~/projects/shared-services/Caddyfile` (if not already present)
+5. Opening the UFW port: `sudo ufw allow <port>/tcp`
+6. Initializing CodeGraph: `codegraph init .`
+
+Do NOT proceed until the project is fully healthy and accessible.
+
 **If the project has a database, check for pending migrations:**
 - Look for a `Makefile` target like `make migrate` or a migrations directory
 - If new migration files exist that have not been applied, apply them
+- If the app auto-migrates on startup (check `AGENTS.md`), a container restart is sufficient
 - If unsure, ask the developer
 
 **If Docker daemon is not running:**
@@ -177,11 +220,30 @@ git commit -m "wip(<scope>): <description> — incomplete, continuing next sessi
 
 ### Step 2: Push to Remote
 
+**ALWAYS pull before pushing to catch remote changes:**
 ```bash
+git pull --rebase origin main
+git push origin main
+```
+
+If on a feature branch:
+```bash
+git pull --rebase origin <branch-name>
 git push origin <branch-name>
 ```
 
 All work must be pushed. Local-only commits are at risk of being lost.
+
+**The full commit-push cycle is:**
+```bash
+git add -A
+git status
+git commit -m "<type>(<scope>): <description>"
+git pull --rebase origin main   # always pull before push
+git push origin main
+```
+
+This prevents "rejected — fetch first" errors when another session pushed to the same branch.
 
 ---
 
@@ -201,10 +263,20 @@ Create or append to the session log at `docs/sessions/YYYY-MM-DD.md`:
 [Bullet list of concrete accomplishments — not intentions, not plans, but what was actually completed and verified.]
 
 ### Decisions Made
-[Any architectural, design, or implementation decisions made during this session. Reference ADRs if created.]
+[For EACH decision:
+- What was decided
+- WHY it was decided (the reasoning)
+- What alternatives were considered and why they were rejected
+- Reference ADRs if created.]
+
+### Conversation Context
+[Key questions the user asked, topics discussed, reasoning exchanged, and any context that would be lost if not written here. This preserves the "why behind the why" — the back-and-forth that led to the decisions above. Include user preferences, constraints mentioned, and verbal agreements.]
 
 ### Issues Encountered
 [Problems hit during the session and how they were resolved. If unresolved, state clearly.]
+
+### Documents and Artifacts Produced
+[List every file created or significantly modified during this session, with a one-line description of each.]
 
 ### Next Steps
 [What should happen in the next session. Be specific — not "continue working" but "implement the payment webhook handler and write integration tests for it."]
@@ -214,6 +286,8 @@ Create or append to the session log at `docs/sessions/YYYY-MM-DD.md`:
 - Session logs must be factual. Do not log intentions — log results.
 - If nothing was accomplished (session was all research/planning), log that honestly.
 - Commit the session log as part of the final commit.
+- **Err on the side of too much context, not too little.** The session log is the ONLY mechanism that preserves conversation context across sessions. A verbose log is infinitely more valuable than a terse one.
+- **Everything discussed is worth recording.** Preferences, constraints, future plans, questions asked — even if they didn’t result in code — belong in the log.
 
 ---
 
@@ -224,6 +298,8 @@ Update the project-level `AGENTS.md` (if it exists) with:
 - What changed in this session
 - Any new dependencies, services, or configuration changes
 
+**Critical:** If your work introduced new dependencies, services, environment variables, ports, or configuration that affect how the project starts, you MUST update the `First-Time Machine Setup` section to reflect these changes. A future developer on a fresh machine must be able to follow that section and arrive at a healthy running state without reading session logs. If the project does not yet have a `First-Time Machine Setup` section and you added infrastructure that requires setup steps, create the section now.
+
 ---
 
 ### Step 5: Mine MemPalace
@@ -233,7 +309,7 @@ export PATH="$HOME/.local/bin:$PATH"
 mempalace mine ~/projects/<project-name>
 ```
 
-This indexes all new and modified files into the palace for future sessions.
+This indexes the **entire project directory** into the palace — code, docs, configuration, skills, AGENTS.md, everything not excluded by `.gitignore`. It is not limited to `docs/`. The goal is zero context loss: every file that exists in the project must be searchable via `mempalace search` in future sessions.
 
 ---
 
