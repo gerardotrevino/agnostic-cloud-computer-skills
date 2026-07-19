@@ -1,11 +1,12 @@
 ---
 name: cloud-computer-setup
-description: Complete guide for agents to provision a new cloud computer with Docker, MemPalace, and a multi-project architecture. Agnostic instructions — works for any team, organization, or project type.
+description: Complete guide for agents to provision a new cloud computer with Docker, MemPalace, CodeGraph, and a multi-project architecture. Agnostic instructions — works for any team, organization, or project type.
 metadata:
   author: Gerardo Treviño Rojas
   contributors: []
   created: 2026-06-27
-  version: "2.2"
+  version: "3.0"
+  updated: 2026-07-18
 ---
 
 # Cloud Computer Setup Protocol
@@ -100,9 +101,11 @@ curl https://mise.run | sh
 
 ---
 
-## Phase 2: MemPalace Installation
+## Phase 2: MemPalace & CodeGraph Installation
 
-MemPalace is the critical memory layer. Install it officially via `uv`.
+MemPalace is the semantic memory layer (Layer 2). CodeGraph is the structural code index (Layer 3). Both are required.
+
+### 2.1 MemPalace (Semantic Index)
 
 ```bash
 # Install MemPalace
@@ -123,6 +126,24 @@ EOF
 mkdir -p ~/projects
 mempalace init ~/projects --yes --no-llm --auto-mine
 ```
+
+### 2.2 CodeGraph (Structural Index)
+
+```bash
+# Install CodeGraph via the official shell script
+curl -fsSL https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.sh | sh
+
+# Verify it lands in ~/.local/bin
+export PATH="$HOME/.local/bin:$PATH"
+codegraph --version
+```
+
+CodeGraph provides surgical, token-efficient codebase exploration. Instead of running `grep` or `cat` on large files, agents use `codegraph` to explore code structure:
+- `codegraph impact "<symbol>"` — blast radius before modifying a function
+- `codegraph callers "<symbol>"` — find all callers of a function
+- `codegraph explore "<query>"` — rich context, source code, and test gaps
+- `codegraph node "<file-path>"` — read a file with structural metadata
+- `codegraph sync` — incrementally update the graph after code changes
 
 ---
 
@@ -292,11 +313,34 @@ Every project MUST have a `docs/` directory committed to Git.
 - `docs/decisions/` — ADRs
 - `docs/sessions/` — daily session logs
 
-## Managing the MemPalace
-MemPalace is installed at `~/.local/bin/mempalace` (via `uv tool install mempalace`).
-- Start of session: `mempalace wake-up`
-- End of session: `mempalace mine ~/projects/<project-name>`
-- Search: `mempalace search "query"`
+## Managing MemPalace and CodeGraph
+
+MemPalace v3.5+ is installed at `~/.local/bin/mempalace`.
+CodeGraph is installed at `~/.local/bin/codegraph`.
+Identity: `~/.mempalace/identity.txt` (machine-local, never shared — read at session start)
+
+**At the start of every session:**
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+cd ~/projects/<project-name>
+git pull --rebase
+codegraph sync      # updates the structural map
+mempalace wake-up   # loads semantic context
+```
+
+**During work (CodeGraph queries):**
+```bash
+codegraph impact "FunctionName"   # check blast radius
+codegraph callers "FunctionName"  # find all callers
+codegraph explore "query"         # find code context
+```
+
+**After completing work:**
+```bash
+codegraph sync                             # index code changes
+mempalace mine ~/projects/<project-name>   # index new docs into the palace
+mempalace mine ~/skills/                   # re-index if skills were updated
+```
 
 ## Git Protocol
 - Always suggest committing and pushing after significant changes.
@@ -310,7 +354,7 @@ MemPalace is installed at `~/.local/bin/mempalace` (via `uv tool install mempala
 ## System-Level Changes Log
 | Date | Change | Details |
 |------|--------|---------|
-| [setup date] | Initial provisioning | cloud-computer-setup skill v2.2 |
+| [setup date] | Initial provisioning | cloud-computer-setup skill v3.0 |
 ```
 
 ---
@@ -336,10 +380,11 @@ project-name/
         └── YYYY-MM-DD.md
 ```
 
-**The two-layer context strategy:**
+**The three-layer context strategy:**
 
 - **Layer 1 (Git):** All context documents live in `docs/` and are committed. This is the durable, portable, shared source of truth. Any developer on any machine gets full project knowledge on `git clone`.
-- **Layer 2 (MemPalace):** The fast semantic search index over Layer 1. If the machine is wiped, clone the repo and run `mempalace mine` to fully restore context in minutes. The palace is always rebuildable from Git.
+- **Layer 2 (MemPalace):** The semantic search index over `docs/` files and code. It answers *why* decisions were made. If the machine is wiped, clone the repo and run `mempalace mine` to fully restore context in minutes.
+- **Layer 3 (CodeGraph):** The structural index over source code. It answers *what* calls what, and *what* breaks if a change is made (blast radius). Rebuilt instantly with `codegraph sync`.
 
 ---
 
@@ -405,11 +450,12 @@ sudo ufw status                    # firewall status
 export PATH="$HOME/.local/bin:$PATH"
 mempalace wake-up                  # MemPalace working
 mempalace status                   # palace wings and drawer count
+codegraph --version                # CodeGraph installed
 ls ~/skills/                       # skills installed
 cat ~/projects/PORT_REGISTRY.md    # port registry present
 ```
 
-Deliver a summary to the user covering: installed tools and versions, running services and ports, palace status (wings and drawer count), and next steps for creating the first project.
+Deliver a summary to the user covering: installed tools and versions, running services and ports, palace status (wings and drawer count), CodeGraph version, and next steps for creating the first project.
 
 ---
 

@@ -3,6 +3,8 @@ name: agent-operating-contract
 description: The master operating contract for all AI agents working on any software project. Defines identity, principles, workflow phases, and hard rules. Agnostic — works for any organization or project type.
 author: Gerardo Treviño Rojas
 created: 2026-06-27
+updated: 2026-07-18
+version: 2.0
 ---
 
 # Agent Operating Contract
@@ -105,7 +107,7 @@ For every non-trivial task, follow these phases in order. Do not skip phases.
 | Open firewall ports | ⚠️ Ask First |
 | Merge or resolve conflicts | ⚠️ Ask First — show diff, get explicit authorization |
 | Commit secrets, API keys, or PATs | 🚫 Never |
-| Push directly to main branch | 🚫 Never by default. If the project has a single developer and the developer directs pushes to main, record this override ONCE in the project's AGENTS.md under 'Project-specific rules'. Once recorded, do not re-ask every session — reference the AGENTS.md entry. The session log must still note that main was pushed directly. |
+| Push directly to main branch | ✅ Default workflow. Pull → work → pull → push. If a project requires branches/PRs, it will be stated in that project's AGENTS.md under 'Project-specific rules'. |
 | Force-push to any branch | 🚫 Never |
 | Skip research or planning phases | 🚫 Never |
 | Claim completion without running verification | 🚫 Never |
@@ -113,6 +115,7 @@ For every non-trivial task, follow these phases in order. Do not skip phases.
 | Touch, pull, modify, or interact with repos outside the active project scope | 🚫 Never — requires explicit instruction naming the specific repo |
 | Guess which repo/file the user means when the instruction is ambiguous | 🚫 Never — ask for clarification |
 | Clone a project without bringing it to a healthy running state | 🚫 Never — clone = runnable. Follow AGENTS.md `First-Time Machine Setup` section until health check passes. |
+| Create a new project (port block, scaffold, GitHub repo, MemPalace wing, registry entry, instructions file) from a project-scoped session | 🚫 Never — project creation is reserved for infrastructure sessions. See Section 15.0. Document the need and recommend an infrastructure session instead. |
 
 **ADR Trigger Definition:** An ADR (Architecture Decision Record) is REQUIRED for: (a) new infrastructure decisions (reverse proxy choice, database engine, hosting provider, CI/CD platform), (b) new dependency additions that affect architecture (not minor utility libraries), (c) architecture pattern changes (new service, new communication pattern, new auth mechanism), (d) deployment topology changes (new environment, new region, container orchestration change), (e) any decision that would confuse a future developer encountering the codebase for the first time. If in doubt, write the ADR — a short unnecessary ADR costs 5 minutes; a missing ADR costs hours of reverse-engineering.
 
@@ -234,7 +237,15 @@ This incrementally updates the graph in milliseconds.
 
 ## 8. Git — Safe Push Protocol
 
-Always suggest committing and pushing after significant changes. Before pushing, run `git status` and `git pull --rebase` to check for upstream changes. If conflicts exist: notify the user with a clear description of what conflicts exist, get explicit authorization to resolve them, show the full diff after resolution, get a second confirmation, then push.
+**Default workflow (all projects unless stated otherwise in project AGENTS.md):**
+
+1. `git pull --rebase origin main` — before starting any work
+2. Work directly on `main` — commit frequently in small logical units
+3. `git pull --rebase origin main` — before pushing (catch upstream changes)
+4. Resolve conflicts if any — notify user, show diff, get authorization
+5. `git push origin main` — push when work is complete or at logical checkpoints
+
+If a project grows and requires branches/PRs, that will be documented in the project's AGENTS.md. Until then, push directly to main. Always suggest committing and pushing after significant changes.
 
 After every push, verify that GitHub Actions / CI checks pass. If CI fails: read the full failure logs, attempt to fix the issue, summarize what failed and what was fixed, notify the user, and only push the fix after user confirmation. Never leave a broken CI state unresolved.
 
@@ -346,7 +357,19 @@ The following rules ensure that ALL context generated during a session survives 
 
 ## 15. New Project Creation Protocol
 
-When the task is to create a new project, follow these steps in order. Do not skip any step.
+**15.0 Project Creation Authority (Non-Negotiable).** Only **infrastructure sessions** (sessions whose active project is the organization's infrastructure project, e.g., `paybook-infrastructure`) may create new projects. Creating a new project means ANY of the following: claiming a port block, running the project scaffold, creating a new directory under `~/projects/`, creating a new GitHub repository, initializing a new MemPalace wing, adding a new entry to `PORT_REGISTRY.md`, or authoring a new project-instructions file.
+
+Project-scoped agents (sessions running on any product project) MUST NOT perform any of these actions — not even when the new project seems like a natural extension of their own (e.g., a mobile variant of a web design system). Doing so violates Section 6.1 (Project Scope Isolation) and creates untracked infrastructure: unregistered ports, missing instructions files, missing wings, and undocumented repos.
+
+When a project-scoped agent identifies the need for a new project, the correct procedure is:
+1. **Stop.** Do not scaffold, do not claim ports, do not create repos or directories.
+2. **Document the need.** Write a short proposal (name, purpose, why it cannot live inside the current project, suggested stack) into the current project's `docs/` and the session log.
+3. **Tell the user.** Recommend that the user open an **infrastructure session** to create the project. The infrastructure agent owns the full creation protocol below and will hand the new project back fully registered (port block, repo, instructions file, MemPalace wing, ADR).
+4. **Wait.** Resume work only within the existing project scope.
+
+If a project-scoped agent discovers that a project was created outside this protocol (e.g., missing registry entry, missing instructions file), it must report the gap to the user and recommend an infrastructure session to regularize it — it must not attempt the fix itself.
+
+When the task is to create a new project (infrastructure sessions only), follow these steps in order. Do not skip any step.
 
 1. **Requirements first.** Before writing any code or creating any files, confirm that a PRD exists or use the `prd-rfp` skill to create one. Never start building without defined requirements.
 
@@ -375,9 +398,13 @@ The scaffold, the registry, the GitHub repo, and the MemPalace wing must all exi
 ## 16. Project Onboarding Documents
 
 When setting up a new developer environment or a new cloud computer, the agent MUST follow the `cloud-computer-provisioning` skill. The developer MUST declare three pieces of identity before any work begins:
-1. **Name** (e.g., "Gerardo Treviño")
-2. **Organization / Role** (e.g., "Acme Corp.")
-3. **Domain / Subdomain** (e.g., `g-cc-1.internal-services.network`) — This is required for Caddy to route HTTPS traffic to the local Docker containers.
+1. **Full Name** — ASK the developer directly. Do NOT use any name found in this contract, skill files, or git history.
+2. **Email** — for git commits
+3. **GitHub username** — for attribution
+4. **Role/Position** — their role at the organization
+5. **Domain / Subdomain** (e.g., `m-cc-1.internal-services.network`) — Required for Caddy HTTPS routing.
+
+Organization defaults to the value in the project-level instructions. Do not guess from file metadata.
 
 Every project must maintain two onboarding documents that are always current, always committed to Git, and always the first thing a new developer or agent reads. These are not optional documentation — they are operational requirements.
 

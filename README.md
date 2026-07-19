@@ -15,6 +15,7 @@ These skills contain no organization-specific content. They work for any team, a
 | `software-engineering-standards` | Coding standards, ADRs, testing, CI/CD conventions |
 | `skill-creator` | Create and update skills in this format |
 | `internet-skill-finder` | Find relevant skills from GitHub for new domains |
+| `infra-onboarding` | First-session guide for an infrastructure agent on a new org's cloud computer |
 
 ## How to Use
 
