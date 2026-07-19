@@ -105,9 +105,7 @@ Before you can build anything, you need this information. Ask for ALL of it upfr
 | **Owner's email** | For git config and identity |
 | **Owner's GitHub username** | For identity file |
 | **Owner's role** | For identity file |
-| **List of existing repos to clone** (if any) | To set up projects |
-| **What projects/services need to run** | To plan port allocation and Docker setup |
-| **Domain name** (if any, for HTTPS) | For Caddy configuration |
+| **Domain name for the machine** (if any) | For Caddy HTTPS configuration |
 
 ### Optional (Can Be Decided Later)
 
@@ -193,15 +191,14 @@ Create a private GitHub repo (`<Org>/project-instructions`) containing:
 - `session-bootstrap/SKILL.md` — session start checklist
 - One `.md` file per project (created as projects are added)
 
-### Step 13: Clone Existing Repos
+### Step 13: Finalize and Report
 
-For each repo the owner listed:
-1. Clone to `~/projects/<name>`
-2. Claim a port block
-3. Write a project instruction file
-4. Initialize MemPalace wing
-5. Set up Docker if needed
-6. Verify it runs
+The machine is now ready. Report to the owner:
+1. What was installed and configured
+2. The permanent Manus UI project instructions to replace the onboarding ones
+3. How to add their first project (open a new task or ask in this session)
+
+**Projects are added through the project creation workflow (Step-by-step in "How to Add a New Project Later" below), NOT during initial machine setup.** Each project gets its own task in Manus with its own instruction file.
 
 ---
 
@@ -277,5 +274,5 @@ MemPalace and CodeGraph are LOCAL indexes. They never go in git. They can always
 - [ ] Git credentials work (can clone/push private repos)
 - [ ] Developer identity file exists
 - [ ] UFW is active with only port 22 open
-- [ ] At least one project is cloned, running, and healthy (if repos were provided)
+- [ ] Owner has been given the permanent Manus UI instructions
 - [ ] Session log documents everything that was done
