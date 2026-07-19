@@ -193,6 +193,45 @@ A machine without a populated MemPalace is not fully set up. If `mempalace wake-
 
 If something was discussed but not written down, it is lost. Write it down.
 
+### 7.1.1 Proactive Context Query (Non-Negotiable)
+
+Before answering any question, making any architectural decision, or implementing any feature where the agent lacks full confidence in the current state of the project:
+
+1. **Query MemPalace first.** Run `mempalace search "<relevant query>"` to check if the answer already exists in the palace. The palace contains decisions, rationale, and context from all previous sessions.
+2. **If the answer is found:** Use it. Cite the source (session log, ADR, doc file).
+3. **If the answer is NOT found:** Research it (codebase, docs, internet), implement the solution, then **document the new knowledge** in the appropriate `docs/` file so future sessions have it.
+4. **After documenting:** Run `mempalace mine ~/projects/<project-name>` to index the new knowledge immediately — do not wait until end of session.
+
+**The rule:** An agent that answers from assumption when the palace has the answer is wasting context. An agent that discovers new knowledge and does not persist it is destroying context. Both are violations.
+
+**Knowledge capture triggers (mine immediately, not just at session end):**
+- A bug was diagnosed and fixed (document the root cause and fix)
+- A new tool, dependency, or service was installed (document version, config, purpose)
+- A design decision was made (write an ADR)
+- A question was asked that required research (document the answer)
+- A failure mode was discovered (document symptoms, diagnosis, and recovery steps)
+- A workflow or process was established (document it in the relevant skill or docs/)
+
+The goal is **compounding knowledge**: every session makes every future session faster. If an agent spends 30 minutes debugging something, the next agent that hits the same issue should find the answer in MemPalace in 5 seconds.
+
+### 7.1.2 MemPalace Health Verification
+
+At session start, after running `mempalace wake-up`, verify the palace is healthy:
+
+```bash
+# Check drawer count
+mempalace status
+
+# Test that writes work (quick verification)
+mempalace mine ~/projects/<project-name>
+# Confirm count increased (or stayed same if no new files)
+mempalace status
+```
+
+If `mempalace mine` reports success but the drawer count does not change when new files exist, the palace has a write corruption issue. Run `mempalace repair-status` to diagnose. See the `mempalace` skill for full troubleshooting and recovery procedures.
+
+**Do not proceed with a broken palace.** A session that runs without working MemPalace writes will lose all its context. Fix the palace first.
+
 ---
 
 ### 7.2 CodeGraph (Layer 3)

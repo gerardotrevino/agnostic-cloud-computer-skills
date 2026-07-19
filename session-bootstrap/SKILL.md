@@ -51,7 +51,7 @@ org: [Organization name]
 
 ---
 
-### Step 3: Load Memory
+### Step 3: Load Memory and Verify Palace Health
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
@@ -59,6 +59,15 @@ mempalace wake-up
 ```
 
 This loads the L0 (identity) and L1 (essential story) context. Review the output to understand what projects exist and what was done in recent sessions.
+
+**Health verification (mandatory):**
+
+```bash
+# Note the current drawer count
+mempalace status
+```
+
+Remember this count. After Step 6 (Sync Project), you will mine and verify the count increases. If it does not increase when new files exist, the palace has a write corruption issue. See the `mempalace` skill for diagnosis and recovery. **Do not proceed with a broken palace** — a session without working writes loses all its context permanently.
 
 ---
 
@@ -191,6 +200,14 @@ sudo systemctl start docker
 Ask the developer what they want to accomplish in this session. Do not assume. Do not start working on something from a previous session without confirmation.
 
 > "Environment is ready. What would you like to work on today?"
+
+**Proactive context rule (applies throughout the entire session):**
+Before answering any question, making any architectural decision, or implementing any feature where you lack full confidence in the current state:
+1. Run `mempalace search "<relevant query>"` first
+2. If the answer exists — use it, cite the source
+3. If not found — research it, document the answer in `docs/`, mine immediately
+
+An agent that guesses when the palace has the answer is wasting context. An agent that discovers new knowledge and does not persist it is destroying context.
 
 ---
 
