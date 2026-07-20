@@ -232,6 +232,26 @@ If `mempalace mine` reports success but the drawer count does not change when ne
 
 **Do not proceed with a broken palace.** A session that runs without working MemPalace writes will lose all its context. Fix the palace first.
 
+### 7.1.3 Cross-Project Context Propagation (Non-Negotiable)
+
+Whenever work performed in one project (e.g., infrastructure) concerns, affects, or produces artifacts relevant to another project, the relevant context **must** be propagated to the affected project. This includes:
+
+- Conversation decisions that affect the other project's architecture, configuration, or roadmap
+- Research, errors, and outcomes discovered while working on the other project's behalf
+- Files, scripts, or configurations created for the other project
+- Session log entries describing work done for the other project
+
+**The rule:** Context created while orchestrating from Project A that concerns Project B must be made self-contained inside Project B's Git-tracked documentation. It is not sufficient for the context to exist only in Project A's session log.
+
+**Required steps when cross-project work occurs:**
+
+1. Write the relevant decisions, research, and outcomes into `~/projects/<affected-project>/docs/` (session log entry, ADR, or appropriate doc file)
+2. Commit and push the changes to the affected project's repo
+3. Run `mempalace mine ~/projects/<affected-project>` to index the new context into that project's wing
+4. Run `codegraph sync` if code was affected
+
+**Why this matters:** A future agent working on Project B must be able to find ALL context about Project B by querying Project B's palace wing and reading Project B's docs. If critical decisions about Project B are buried in Project A's session log, they are effectively invisible to Project B's agent — violating the zero-context-loss rule.
+
 ---
 
 ### 7.2 CodeGraph (Layer 3)
