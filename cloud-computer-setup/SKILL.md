@@ -161,7 +161,13 @@ docker network create dev-shared || true
 
 ### 3.1 Port Registry
 
-The port registry prevents conflicts across projects. Each project claims a block of 10 ports. Create `~/projects/PORT_REGISTRY.md`:
+The port registry prevents conflicts across projects. Each project claims a block of 10 ports. Create `~/projects/<org>-infrastructure/PORT_REGISTRY.md` and symlink it to `~/projects/PORT_REGISTRY.md`:
+
+```bash
+# File lives in the infrastructure repo (version-controlled)
+# Symlink provides convenience access from ~/projects/
+ln -s ~/projects/<org>-infrastructure/PORT_REGISTRY.md ~/projects/PORT_REGISTRY.md
+```
 
 ```markdown
 # Port Registry
@@ -197,7 +203,13 @@ Rules:
 
 ### 3.2 Global Makefile
 
-Create `~/projects/Makefile` for discoverability and common operations:
+Create `~/projects/<org>-infrastructure/Makefile` and symlink to `~/projects/Makefile`:
+
+```bash
+ln -s ~/projects/<org>-infrastructure/Makefile ~/projects/Makefile
+```
+
+Content for discoverability and common operations:
 
 ```makefile
 .PHONY: status help new-project
@@ -221,7 +233,14 @@ help:
 
 ### 3.3 Scaffolding Script
 
-Create `~/projects/new-project.sh` (chmod +x). This script **enforces** the multi-project contract — it does not merely print a manual checklist. When invoked, it must perform all of the following automatically:
+Create `~/projects/<org>-infrastructure/scaffolding/new-project.sh` (chmod +x) and symlink to `~/projects/new-project.sh`:
+
+```bash
+mkdir -p ~/projects/<org>-infrastructure/scaffolding
+ln -s ~/projects/<org>-infrastructure/scaffolding/new-project.sh ~/projects/new-project.sh
+```
+
+This script **enforces** the multi-project contract — it does not merely print a manual checklist. When invoked, it must perform all of the following automatically:
 
 1. Validate the requested port block is `Available` in `PORT_REGISTRY.md`.
 2. Copy the template into `~/projects/<name>/`.
@@ -293,9 +312,11 @@ This is a persistent developer environment designed for running multiple project
 
 ## Directory Structure
 - `~/projects/` — Root for all developer work.
-- `~/projects/PORT_REGISTRY.md` — **MUST READ THIS** before starting any new project.
-- `~/projects/new-project.sh` — Script to scaffold new projects.
-- `~/projects/Makefile` — Global commands (`make status`).
+- `~/projects/<org>-infrastructure/` — Infrastructure repo (version-controlled source of truth for machine-level files).
+- `~/projects/PORT_REGISTRY.md` → symlink to `<org>-infrastructure/PORT_REGISTRY.md` — **MUST READ THIS** before starting any new project.
+- `~/projects/new-project.sh` → symlink to `<org>-infrastructure/scaffolding/new-project.sh` — Script to scaffold new projects.
+- `~/projects/Makefile` → symlink to `<org>-infrastructure/Makefile` — Global commands (`make status`).
+- All infrastructure files are version-controlled in the infrastructure repo and symlinked to `~/projects/` for convenience and portability.
 
 ## Creating a New Project
 1. Read `~/projects/PORT_REGISTRY.md` to find an available port block.
